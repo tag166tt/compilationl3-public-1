@@ -1,7 +1,6 @@
-import org.sablecc.sablecc.analysis.DepthFirstAdapter;
-import org.sablecc.sablecc.node.Node;
-
 import java.io.*;
+import sc.analysis.*;
+import sc.node.*;
 
 class Sc2Xml extends DepthFirstAdapter {
     private int indentation;

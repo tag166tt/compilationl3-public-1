@@ -1,6 +1,6 @@
-import org.sablecc.sablecc.lexer.Lexer;
-import org.sablecc.sablecc.node.Start;
-import org.sablecc.sablecc.parser.Parser;
+import sc.lexer.Lexer;
+import sc.node.Start;
+import sc.parser.Parser;
 
 import java.io.FileReader;
 import java.io.IOException;
