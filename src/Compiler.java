@@ -44,7 +44,7 @@ public class Compiler {
                 // Parse the input.
                 Start tree = p.parse();
 
-                //System.out.println("[SC]");
+                System.out.println("[SC]");
                 tree.apply(new Sc2Xml(baseName));
 
                 /*System.out.println("[SA]");
