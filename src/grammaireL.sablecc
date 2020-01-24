@@ -9,8 +9,7 @@ Tokens
  nombre = chiffre+;
  espaces = (' ' | 13 | 10)+;
  commentaire= '#' [[0 .. 0xffff] - [10 + 13]]* (10 | 13 | 10 13);
- entier = 'entier ';
- nom = (lettre | '$' | '_')(lettre | chiffre | '$' | '_')*;
+ entier = 'entier';
  pv = ';';
  p_gauche = '(';
  p_droite = ')';
@@ -22,17 +21,18 @@ Tokens
  mult = '*';
  div = '/';
  egal = '=';
- si = 'si ';
- alors = ' alors';
- sinon = 'sinon ';
- tantque = 'tantque ';
- faire = ' faire';
+ si = 'si';
+ alors = 'alors';
+ sinon = 'sinon';
+ tantque = 'tantque';
+ faire = 'faire';
  p_ecl = '!';
  inf = '<';
  esp = '&';
  pipe = '|';
  c_gauche = '[';
  c_droite = ']';
+ nom = (lettre | '$' | '_')(lettre | chiffre | '$' | '_')*;
 
 Ignored Tokens
  espaces, commentaire;
@@ -43,7 +43,7 @@ Productions
 
  /* Déclaration variables */
  optdecvar = decvar*;
- decvar = entier nom pv;
+ decvar = {entier} entier nom pv | {tab} entier nom c_gauche nombre c_droite pv;
 
  /* Déclaration variables */
  optdecarg = decarg* declastarg;
@@ -52,7 +52,7 @@ Productions
 
  /* Déclaration fonctions */
  listdecfunc = func*;
- func = nom p_gauche optdecarg p_droite ac_gauche statement* ac_droite;
+ func = nom p_gauche optdecarg p_droite ac_gauche statement_bloc ac_droite;
 
  /* opérations */
  expression = {et} et | {ou} expression pipe et;
@@ -61,19 +61,20 @@ Productions
  plus_minus = {term} term | {plus} plus_minus plus term | {minus} plus_minus minus term;
  term = {non} non | {mult} term mult non | {div} term div non;
  non = {facteur} facteur | {non} p_ecl facteur;
- facteur = {identifier} nom | {nombre} nombre | {parenthese} p_gauche expression p_droite;
+ facteur = {identifier} nom | {nombre} nombre | {tab} nom c_gauche nombre c_droite | {parenthese} p_gauche expression p_droite;
 
- statement = {appel} appel_func pv | {assign} assignement | {si_sinon} bloc_si_sinon | {faire} bloc_faire;
+ statement_bloc = {bloc} statement statement_bloc | {empty};
+ statement = {appel} appel_func pv | {assign} assignement | {si_sinon} bloc_si_sinon | {faire} bloc_tq;
 
- assignement = {exp} nom egal expression pv | {appel} nom egal appel_func pv;
+ assignement = {exp} nom egal expression pv | {appel} nom egal appel_func pv | {exp_tab} nom c_gauche nombre c_droite egal expression pv | {appel_tab} nom c_gauche nombre c_droite egal appel_func pv;
  appel_func = nom p_gauche suite_exp p_droite;
 
- suite_exp = exp_virg* exp_or_func | {vide};
+ suite_exp = {list_arg} exp_virg suite_exp | {single_arg} exp_or_func | {vide};
  exp_virg = exp_or_func virg;
 
  exp_or_func = {exp} expression | {func} appel_func;
 
- bloc_si_sinon = {si} bloc_si | {si_sinon} bloc_si sinon ac_gauche statement* ac_droite;
- bloc_si = si expression alors ac_gauche statement* ac_droite;
+ bloc_si_sinon = {si} bloc_si | {si_sinon} bloc_si sinon ac_gauche statement_bloc ac_droite;
+ bloc_si = si expression alors ac_gauche statement_bloc ac_droite;
 
- bloc_faire = tantque expression faire ac_gauche statement* ac_droite;
+ bloc_tq = tantque expression faire ac_gauche statement_bloc ac_droite;

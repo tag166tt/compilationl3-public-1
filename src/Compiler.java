@@ -2,63 +2,80 @@ import sc.lexer.Lexer;
 import sc.node.Start;
 import sc.parser.Parser;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PushbackReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Compiler {
 
     public static void main(String[] args) {
-        PushbackReader br = null;
-        String baseName = null;
+        List<String> fileNames = new ArrayList<>();
 
-        try {
-            if (0 < args.length) {
-                br = new PushbackReader(new FileReader(args[0]));
-                baseName = removeSuffix(args[0], ".l");
-            } else {
-                System.out.println("il manque un argument");
+        File folder = new File("test\\input");
+        File[] listOfFiles = folder.listFiles();
+
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(".l")) {
+                fileNames.add(listOfFiles[i].getAbsolutePath());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
-        try {
-            // Create a Parser instance.
-            Parser p = new Parser(new Lexer(br));
-            // Parse the input.
-            Start tree = p.parse();
+        for (String fileName : fileNames) {
+            PushbackReader br = null;
+            String baseName = null;
 
-            System.out.println("[SC]");
-            tree.apply(new Sc2Xml(baseName));
+            try {
+                if (0 < args.length) {
+                    br = new PushbackReader(new FileReader(fileName), 1024);
+                    baseName = removeSuffix(fileName, ".l");
+                } else {
+                    System.out.println("il manque un argument");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-    	    /*System.out.println("[SA]");
-            Sc2sa sc2sa = new Sc2sa();
-            tree.apply(sc2sa);
-            SaNode saRoot = sc2sa.getRoot();
-            new Sa2Xml(saRoot, baseName);
+            try {
+                // Create a Parser instance.
+                Parser p = new Parser(new Lexer(br));
+                // Parse the input.
+                Start tree = p.parse();
 
-            System.out.println("[TABLE SYMBOLES]");
-            Ts table = new Sa2ts(saRoot).getTableGlobale();
-            table.afficheTout(baseName);
+                //System.out.println("[SC]");
+                tree.apply(new Sc2Xml(baseName));
 
-            System.out.println("[C3A]");
-            C3a c3a = new Sa2c3a(saRoot, table).getC3a();
-            c3a.affiche(baseName);
+                /*System.out.println("[SA]");
+                Sc2sa sc2sa = new Sc2sa();
+                tree.apply(sc2sa);
+                SaNode saRoot = sc2sa.getRoot();
+                new Sa2Xml(saRoot, baseName);
 
-            System.out.println("[NASM]");
-            Nasm nasm = new C3a2nasm(c3a, table).getNasm();
-            nasm.affiche(baseName);
+                System.out.println("[TABLE SYMBOLES]");
+                Ts table = new Sa2ts(saRoot).getTableGlobale();
+                table.afficheTout(baseName);
 
-            System.out.println("[FLOW GRAPH]");
-            Fg fg = new Fg(nasm);
-            fg.affiche(baseName);
+                System.out.println("[C3A]");
+                C3a c3a = new Sa2c3a(saRoot, table).getC3a();
+                c3a.affiche(baseName);
 
-            System.out.println("[FLOW GRAPH SOLVE]");
-            FgSolution fgSolution = new FgSolution(nasm, fg);
-            fgSolution.affiche(baseName);*/
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+                System.out.println("[NASM]");
+                Nasm nasm = new C3a2nasm(c3a, table).getNasm();
+                nasm.affiche(baseName);
+
+                System.out.println("[FLOW GRAPH]");
+                Fg fg = new Fg(nasm);
+                fg.affiche(baseName);
+
+                System.out.println("[FLOW GRAPH SOLVE]");
+                FgSolution fgSolution = new FgSolution(nasm, fg);
+                fgSolution.affiche(baseName);*/
+            } catch (Exception e) {
+                System.out.println("fileName = " + fileName);
+                System.out.println(e.getMessage());
+            }
         }
     }
 

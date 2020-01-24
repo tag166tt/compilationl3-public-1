@@ -1,3 +1,3 @@
 #!/bin/bash
 rm -rf sc
-java -jar ../sablecc.jar grammaireL.sablecc
+java -jar ../sablecc.jar grammaireL.alt.sablecc
