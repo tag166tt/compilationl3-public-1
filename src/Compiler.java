@@ -17,9 +17,10 @@ public class Compiler {
         File folder = new File("test\\input");
         File[] listOfFiles = folder.listFiles();
 
-        for (int i = 0; i < listOfFiles.length; i++) {
-            if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(".l")) {
-                fileNames.add(listOfFiles[i].getAbsolutePath());
+        assert listOfFiles != null;
+        for (File listOfFile : listOfFiles) {
+            if (listOfFile.isFile() && listOfFile.getName().endsWith(".l")) {
+                fileNames.add(listOfFile.getAbsolutePath());
             }
         }
 
