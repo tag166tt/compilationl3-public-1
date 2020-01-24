@@ -1,19 +1,79 @@
 Package sc;
 
 Helpers
-
-lettre = [['a' .. 'z'] + ['A' .. 'Z']];
+ lettre = [['a' .. 'z'] + ['A' .. 'Z']];
+ chiffre = ['0' .. '9'];
+ char = lettre + '$' + '_';
 
 Tokens
-
-espaces = (' ' | 13 | 10)+;
-commentaire= '#' [[0 .. 0xffff] - [10 + 13]]* (10 | 13 | 10 13);
+ nombre = chiffre+;
+ espaces = (' ' | 13 | 10)+;
+ commentaire= '#' [[0 .. 0xffff] - [10 + 13]]* (10 | 13 | 10 13);
+ entier = 'entier ';
+ nom = (lettre | '$' | '_')(lettre | chiffre | '$' | '_')*;
+ pv = ';';
+ p_gauche = '(';
+ p_droite = ')';
+ virg = ',';
+ ac_gauche = '{';
+ ac_droite = '}';
+ plus = '+';
+ minus = '-';
+ mult = '*';
+ div = '/';
+ egal = '=';
+ si = 'si ';
+ alors = ' alors';
+ sinon = 'sinon ';
+ tantque = 'tantque ';
+ faire = ' faire';
+ p_ecl = '!';
+ inf = '<';
+ esp = '&';
+ pipe = '|';
+ c_gauche = '[';
+ c_droite = ']';
 
 Ignored Tokens
-
-espaces, commentaire;
+ espaces, commentaire;
 
 Productions
+ /* optdecvar */
+ programme = optdecvar listdecfunc;
 
-programme = optdecvar listedecfonc ;
+ /* Déclaration variables */
+ optdecvar = decvar*;
+ decvar = entier nom pv;
 
+ /* Déclaration variables */
+ optdecarg = decarg* declastarg;
+ decarg = entier nom virg;
+ declastarg = entier nom | {vide};
+
+ /* Déclaration fonctions */
+ listdecfunc = func*;
+ func = nom p_gauche optdecarg p_droite ac_gauche statement* ac_droite;
+
+ /* opérations */
+ expression = {et} et | {ou} expression pipe et;
+ et = {eg_inf} eg_inf | {et} et esp eg_inf;
+ eg_inf = {plus_minus} plus_minus | {egal} eg_inf egal plus_minus | {inf} eg_inf inf plus_minus;
+ plus_minus = {term} term | {plus} plus_minus plus term | {minus} plus_minus minus term;
+ term = {non} non | {mult} term mult non | {div} term div non;
+ non = {facteur} facteur | {non} p_ecl facteur;
+ facteur = {identifier} nom | {nombre} nombre | {parenthese} p_gauche expression p_droite;
+
+ statement = {appel} appel_func pv | {assign} assignement | {si_sinon} bloc_si_sinon | {faire} bloc_faire;
+
+ assignement = {exp} nom egal expression pv | {appel} nom egal appel_func pv;
+ appel_func = nom p_gauche suite_exp p_droite;
+
+ suite_exp = exp_virg* exp_or_func | {vide};
+ exp_virg = exp_or_func virg;
+
+ exp_or_func = {exp} expression | {func} appel_func;
+
+ bloc_si_sinon = {si} bloc_si | {si_sinon} bloc_si sinon ac_gauche statement* ac_droite;
+ bloc_si = si expression alors ac_gauche statement* ac_droite;
+
+ bloc_faire = tantque expression faire ac_gauche statement* ac_droite;
