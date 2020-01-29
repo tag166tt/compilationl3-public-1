@@ -10,8 +10,13 @@ public abstract class TsItem {
     //	this.identif = identif;
     //}
 
-    public String getIdentif(){return this.identif;}
+    public String getIdentif() {
+        return this.identif;
+    }
+
     public abstract int getTaille();
+
     public abstract String toString();
+
     public abstract Ts getTable();
 }

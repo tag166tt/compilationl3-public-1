@@ -1,21 +1,27 @@
 package sa;
+
 import ts.*;
 
-public class SaDecTab implements SaDec{
+public class SaDecTab implements SaDec {
     private String nom;
     private int taille;
     public TsItem tsItem;
 
-    public SaDecTab(String nom, int taille){
-	this.nom = nom;
-	this.taille = taille;
-	this.tsItem = null;
+    public SaDecTab(String nom, int taille) {
+        this.nom = nom;
+        this.taille = taille;
+        this.tsItem = null;
     }
 
-    public String getNom(){return this.nom;}
-    public int getTaille(){return this.taille;}
+    public String getNom() {
+        return this.nom;
+    }
 
-    public <T> T accept(SaVisitor <T> visitor) {
+    public int getTaille() {
+        return this.taille;
+    }
+
+    public <T> T accept(SaVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
