@@ -1,3 +1,5 @@
+import sa.Sa2Xml;
+import sa.SaNode;
 import sc.lexer.Lexer;
 import sc.node.Start;
 import sc.parser.Parser;
@@ -6,6 +8,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PushbackReader;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +17,7 @@ public class Compiler {
     public static void main(String[] args) {
         List<String> fileNames = new ArrayList<>();
 
-        File folder = new File("test\\input");
+        File folder = Paths.get("test", "input").toFile();
         File[] listOfFiles = folder.listFiles();
 
         assert listOfFiles != null;
@@ -39,22 +42,26 @@ public class Compiler {
                 e.printStackTrace();
             }
 
+
+            System.out.println(baseName);
+
             try {
                 // Create a Parser instance.
                 Parser p = new Parser(new Lexer(br));
                 // Parse the input.
                 Start tree = p.parse();
 
+
                 System.out.println("[SC]");
                 tree.apply(new Sc2Xml(baseName));
 
-                /*System.out.println("[SA]");
+                System.out.println("[SA]");
                 Sc2sa sc2sa = new Sc2sa();
                 tree.apply(sc2sa);
                 SaNode saRoot = sc2sa.getRoot();
                 new Sa2Xml(saRoot, baseName);
 
-                System.out.println("[TABLE SYMBOLES]");
+                /*System.out.println("[TABLE SYMBOLES]");
                 Ts table = new Sa2ts(saRoot).getTableGlobale();
                 table.afficheTout(baseName);
 
@@ -76,6 +83,7 @@ public class Compiler {
             } catch (Exception e) {
                 System.out.println("fileName = " + fileName);
                 System.out.println(e.getMessage());
+                e.printStackTrace();
             }
         }
     }
