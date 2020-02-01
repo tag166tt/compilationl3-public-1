@@ -97,9 +97,9 @@ public class Compiler {
             int indexOfLastSeparator = baseName.lastIndexOf(File.separator);
             String f = baseName.substring(indexOfLastSeparator + 1);
             Process process = Runtime.getRuntime().exec(String.format("python comp.py %s", f));
-            BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             String s;
-            while ((s = stdInput.readLine()) != null) {
+            while ((s = stdError.readLine()) != null) {
                 System.err.println(s);
             }
         } catch (IOException e) {
