@@ -83,19 +83,6 @@ public class Compiler {
                 e.printStackTrace();
             }
         }
-
-        /*try {
-            Process p = Runtime.getRuntime().exec(" python comp.py");
-            System.out.println("=".repeat(100));
-            System.out.println("Running Python check script on SA :");
-            BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String s;
-            while ((s = stdInput.readLine()) != null) {
-                System.out.println(s);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
     }
 
     public static String removeSuffix(final String s, final String suffix) {
