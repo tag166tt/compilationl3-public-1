@@ -4,10 +4,7 @@ import sc.lexer.Lexer;
 import sc.node.Start;
 import sc.parser.Parser;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PushbackReader;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,18 +29,16 @@ public class Compiler {
             String baseName = null;
 
             try {
-                if (0 < args.length) {
-                    br = new PushbackReader(new FileReader(fileName), 1024);
-                    baseName = removeSuffix(fileName, ".l");
-                } else {
-                    System.out.println("il manque un argument");
-                }
-            } catch (IOException e) {
+                br = new PushbackReader(new FileReader(fileName), 1024);
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
+                System.exit(1);
             }
 
+            baseName = removeSuffix(fileName, ".l");
 
-            System.out.println(baseName);
+            System.out.println();
+            System.out.println(String.format("File base name: %s", baseName));
 
             try {
                 // Create a Parser instance.
@@ -60,6 +55,8 @@ public class Compiler {
                 tree.apply(sc2sa);
                 SaNode saRoot = sc2sa.getRoot();
                 new Sa2Xml(saRoot, baseName);
+
+                checkGenSA(baseName);
 
                 /*System.out.println("[TABLE SYMBOLES]");
                 Ts table = new Sa2ts(saRoot).getTableGlobale();
@@ -86,6 +83,19 @@ public class Compiler {
                 e.printStackTrace();
             }
         }
+
+        /*try {
+            Process p = Runtime.getRuntime().exec(" python comp.py");
+            System.out.println("=".repeat(100));
+            System.out.println("Running Python check script on SA :");
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String s;
+            while ((s = stdInput.readLine()) != null) {
+                System.out.println(s);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
     }
 
     public static String removeSuffix(final String s, final String suffix) {
@@ -95,4 +105,18 @@ public class Compiler {
         return s;
     }
 
+    private static void checkGenSA(String baseName) {
+        try {
+            int indexOfLastSeparator = baseName.lastIndexOf(File.separator);
+            String f = baseName.substring(indexOfLastSeparator + 1);
+            Process process = Runtime.getRuntime().exec(String.format("python comp.py %s", f));
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            String s;
+            while ((s = stdInput.readLine()) != null) {
+                System.err.println(s);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
