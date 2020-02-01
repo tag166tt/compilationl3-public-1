@@ -1,3 +1,3 @@
 @ECHO OFF
-del /F /Q sc
+rd /S /Q sc
 java -jar ../sablecc.jar grammaireL.sablecc
