@@ -11,7 +11,7 @@ def main():
 
     base_file_name = sys.argv[1]
 
-    gen_file = base_gen_directory + f'{base_file_name}.sa'
+    gen_file = base_gen_directory + f'{base_file_name}.sa.xml'
     ref_file = base_sa_ref_directory + f'{base_file_name}.sa'
 
     try:

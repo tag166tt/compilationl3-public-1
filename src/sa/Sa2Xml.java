@@ -1,6 +1,7 @@
 package sa;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintStream;
 
 public class Sa2Xml extends SaDepthFirstVisitor<Void> {
     private int indentation = 0;
@@ -14,7 +15,7 @@ public class Sa2Xml extends SaDepthFirstVisitor<Void> {
         } else {
             try {
                 this.baseFileName = baseFileName;
-                this.fileName = baseFileName + ".sa";
+                this.fileName = baseFileName + ".sa.xml";
                 this.out = new PrintStream(this.fileName);
             } catch (IOException e) {
                 System.err.println("Error: " + e.getMessage());

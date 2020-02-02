@@ -1,6 +1,8 @@
-import java.io.*;
-import sc.analysis.*;
-import sc.node.*;
+import sc.analysis.DepthFirstAdapter;
+import sc.node.Node;
+
+import java.io.IOException;
+import java.io.PrintStream;
 
 class Sc2Xml extends DepthFirstAdapter {
     private int indentation;
@@ -16,7 +18,7 @@ class Sc2Xml extends DepthFirstAdapter {
         } else {
             try {
                 this.baseFileName = baseFileName;
-                this.fileName = baseFileName + ".sc";
+                this.fileName = baseFileName + ".sc.xml";
                 this.out = new PrintStream(this.fileName);
             } catch (IOException e) {
                 System.err.println("Error: " + e.getMessage());
