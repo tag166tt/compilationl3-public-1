@@ -502,6 +502,6 @@ public class Sc2sa extends DepthFirstAdapter {
     public void caseAFuncAppelfunc(AFuncAppelfunc node) {
         // TODO: correct?
         String nom = node.getNom().getText();
-        this.returnValue = new SaAppel(nom, new SaLExp(null, null));
+        this.returnValue = new SaAppel(nom, null);
     }
 }
