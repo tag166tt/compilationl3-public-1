@@ -4,7 +4,7 @@ import ts.*;
 
 public class SaDecVar implements SaDec {
     private String nom;
-    public TsItem tsItem;
+    public TsItemVar tsItem;
 
     public SaDecVar(String nom) {
         this.nom = nom;
