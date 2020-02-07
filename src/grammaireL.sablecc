@@ -9,7 +9,7 @@ Helpers
 
 Tokens
  espaces = (' ' | 13 | 10)+;
- commentaire= '#' [[0 .. 0xffff] - [10 + 13]]* (10 | 13 | 10 13);
+ commentaire = '#' [[0 .. 0xffff] - [10 + 13]]* (10 | 13 | 10 13);
  pv = ';';
  p_gauche = '(';
  p_droite = ')';
