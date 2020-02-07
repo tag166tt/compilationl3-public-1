@@ -46,6 +46,8 @@ def main():
         check_sa(sys.argv[2])
     elif sys.argv[1] == 'ts':
         check_ts(sys.argv[2])
+    else:
+        print(f'Unsuported mode {sys.argv[1]}', file=sys.stderr)
 
 
 if __name__ == '__main__':
