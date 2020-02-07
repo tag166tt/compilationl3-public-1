@@ -3,6 +3,7 @@ import sa.SaNode;
 import sc.lexer.Lexer;
 import sc.node.Start;
 import sc.parser.Parser;
+import ts.Ts;
 
 import java.io.*;
 import java.nio.file.Paths;
@@ -46,7 +47,6 @@ public class Compiler {
                 // Parse the input.
                 Start tree = p.parse();
 
-
                 System.out.println("[SC]");
                 tree.apply(new Sc2Xml(baseName));
 
@@ -56,13 +56,13 @@ public class Compiler {
                 SaNode saRoot = sc2sa.getRoot();
                 new Sa2Xml(saRoot, baseName);
 
-                checkGenSA(baseName);
-
-                /*System.out.println("[TABLE SYMBOLES]");
+                System.out.println("[TABLE SYMBOLES]");
                 Ts table = new Sa2ts(saRoot).getTableGlobale();
                 table.afficheTout(baseName);
 
-                /*System.out.println("[C3A]");
+                checkGenSaTs(baseName);
+
+                /*/*System.out.println("[C3A]");
                 C3a c3a = new Sa2c3a(saRoot, table).getC3a();
                 c3a.affiche(baseName);
 
@@ -92,7 +92,7 @@ public class Compiler {
         return s;
     }
 
-    private static void checkGenSA(String baseName) {
+    private static void checkGenSaTs(String baseName) {
         try {
             int indexOfLastSeparator = baseName.lastIndexOf(File.separator);
             String f = baseName.substring(indexOfLastSeparator + 1);
