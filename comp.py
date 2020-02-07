@@ -22,8 +22,8 @@ base_gen_directory = 'test/input/'
 def check_sa(base_file_name):
     base_sa_ref_directory = 'test/sa-ref/'
 
-    gen_sa_file = base_gen_directory + f'{base_file_name}.sa.xml'
-    ref_sa_file = base_sa_ref_directory + f'{base_file_name}.sa'
+    gen_sa_file = f'{base_gen_directory}{base_file_name}.sa.xml'
+    ref_sa_file = f'{base_sa_ref_directory}{base_file_name}.sa'
 
     run_checks(gen_sa_file, ref_sa_file)
 
@@ -31,8 +31,8 @@ def check_sa(base_file_name):
 def check_ts(base_file_name):
     base_ts_ref_directory = 'test/ts-ref/'
 
-    gen_ts_file = base_gen_directory + f'{base_file_name}.ts'
-    ref_ts_file = base_ts_ref_directory + f'{base_file_name}.ts'
+    gen_ts_file = f'{base_gen_directory}{base_file_name}.ts'
+    ref_ts_file = f'{base_ts_ref_directory}{base_file_name}.ts'
 
     run_checks(gen_ts_file, ref_ts_file)
 
