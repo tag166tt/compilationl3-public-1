@@ -1,5 +1,21 @@
 import sys
 
+
+def run_checks(gen_file, ref_file):
+    try:
+        with open(gen_file, 'r') as f:
+            gen_f = f.read()
+
+        with open(ref_file, 'r') as f:
+            ref_f = f.read()
+
+        if gen_f != ref_f:
+            print(gen_f == ref_f, '\t', gen_file, ref_file, file=sys.stderr)
+
+    except Exception as e:
+        print(e, file=sys.stderr)
+
+
 base_gen_directory = 'test/input/'
 
 
@@ -9,18 +25,7 @@ def check_sa(base_file_name):
     gen_sa_file = base_gen_directory + f'{base_file_name}.sa.xml'
     ref_sa_file = base_sa_ref_directory + f'{base_file_name}.sa'
 
-    try:
-        with open(gen_sa_file, 'r') as f:
-            gen_sa_f = f.read()
-
-        with open(ref_sa_file, 'r') as f:
-            ref_sa_f = f.read()
-
-        if gen_sa_f != ref_sa_f:
-            print(gen_sa_f == ref_sa_f, '\t', gen_sa_file, ref_sa_file, file=sys.stderr)
-
-    except Exception as e:
-        print(e, file=sys.stderr)
+    run_checks(gen_sa_file, ref_sa_file)
 
 
 def check_ts(base_file_name):
@@ -29,17 +34,7 @@ def check_ts(base_file_name):
     gen_ts_file = base_gen_directory + f'{base_file_name}.ts'
     ref_ts_file = base_ts_ref_directory + f'{base_file_name}.ts'
 
-    try:
-        with open(gen_ts_file, 'r') as f:
-            gen_ts_f = f.read()
-
-        with open(ref_ts_file, 'r') as f:
-            ref_ts_f = f.read()
-
-        if gen_ts_f != ref_ts_f:
-            print(gen_ts_f == ref_ts_f, '\t', gen_ts_file, ref_ts_file, file=sys.stderr)
-    except Exception as e:
-        print(e, file=sys.stderr)
+    run_checks(gen_ts_file, ref_ts_file)
 
 
 def main():
