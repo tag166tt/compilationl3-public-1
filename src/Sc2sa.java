@@ -56,13 +56,26 @@ public class Sc2sa extends DepthFirstAdapter {
     }
 
     @Override
+    public void caseADecvarboolDecvar(ADecvarboolDecvar node) {
+        String nom = node.getNom().getText();
+        returnValue = new SaDecVar(nom);
+    }
+
+    @Override
+    public void caseADecvarbooltabDecvar(ADecvarbooltabDecvar node) {
+        String nom = node.getNom().getText();
+        int cap = Integer.parseInt(node.getNombre().getText());
+        returnValue = new SaDecTab(nom, cap);
+    }
+
+    @Override
     public void caseADecvarintDecvar(ADecvarintDecvar node) {
         String nom = node.getNom().getText();
         returnValue = new SaDecVar(nom);
     }
 
     @Override
-    public void caseADecvartabDecvar(ADecvartabDecvar node) {
+    public void caseADecvarinttabDecvar(ADecvarinttabDecvar node) {
         String nom = node.getNom().getText();
         int cap = Integer.parseInt(node.getNombre().getText());
         returnValue = new SaDecTab(nom, cap);

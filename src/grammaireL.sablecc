@@ -27,6 +27,7 @@ Tokens
  tantque = 'tantque';
  faire = 'faire';
  retour = 'retour';
+ bool = 'bool';
  entier = 'entier';
  lire = 'lire';
  ecrire = 'ecrire';
@@ -59,8 +60,18 @@ Productions
   {decvar} virg decvar;
 
  decvar =
+  {decvarbool} bool nom |
+  {decvarbooltab} bool nom c_gauche nombre c_droite |
   {decvarint} entier nom |
-  {decvartab} entier nom c_gauche nombre c_droite;
+  {decvarinttab} entier nom c_gauche nombre c_droite;
+
+ /*decvarbool =
+  {decvarbool} bool nom |
+  {decvarbooltab} bool nom c_gauche nombre c_droite;
+
+ decvarint =
+  {decvarint} entier nom |
+  {decvarinttab} entier nom c_gauche nombre c_droite;*/
 
 
  /* Déclaration fonctions */
