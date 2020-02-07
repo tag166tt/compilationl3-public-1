@@ -65,14 +65,6 @@ Productions
   {decvarint} entier nom |
   {decvarinttab} entier nom c_gauche nombre c_droite;
 
- /*decvarbool =
-  {decvarbool} bool nom |
-  {decvarbooltab} bool nom c_gauche nombre c_droite;
-
- decvarint =
-  {decvarint} entier nom |
-  {decvarinttab} entier nom c_gauche nombre c_droite;*/
-
 
  /* Déclaration fonctions */
  declistfunc = {declistfunc} decfunc declistfunc | {empty};
