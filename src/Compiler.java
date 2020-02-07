@@ -27,7 +27,7 @@ public class Compiler {
 
         for (String fileName : fileNames) {
             PushbackReader br = null;
-            String baseName = null;
+            String baseName;
 
             try {
                 br = new PushbackReader(new FileReader(fileName), 1024);
