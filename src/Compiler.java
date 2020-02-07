@@ -56,11 +56,13 @@ public class Compiler {
                 SaNode saRoot = sc2sa.getRoot();
                 new Sa2Xml(saRoot, baseName);
 
+                checkSA(baseName);
+
                 System.out.println("[TABLE SYMBOLES]");
                 Ts table = new Sa2ts(saRoot).getTableGlobale();
                 table.afficheTout(baseName);
 
-                checkGenSaTs(baseName);
+                checkTS(baseName);
 
                 /*/*System.out.println("[C3A]");
                 C3a c3a = new Sa2c3a(saRoot, table).getC3a();
@@ -92,11 +94,11 @@ public class Compiler {
         return s;
     }
 
-    private static void checkGenSaTs(String baseName) {
+    private static void checkGenFiles(String baseName, String mode) {
         try {
             int indexOfLastSeparator = baseName.lastIndexOf(File.separator);
             String f = baseName.substring(indexOfLastSeparator + 1);
-            Process process = Runtime.getRuntime().exec(String.format("python comp.py %s", f));
+            Process process = Runtime.getRuntime().exec(String.format("python comp.py %s %s", mode, f));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             String s;
             while ((s = stdError.readLine()) != null) {
@@ -105,5 +107,13 @@ public class Compiler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void checkSA(String baseName) {
+        checkGenFiles(baseName, "sa");
+    }
+
+    private static void checkTS(String baseName) {
+        checkGenFiles(baseName, "ts");
     }
 }
