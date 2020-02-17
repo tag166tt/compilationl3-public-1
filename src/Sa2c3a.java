@@ -278,4 +278,60 @@ public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
         return null;
     }
 
+    @Override
+    public C3aOperand visit(SaExpEqual node) {
+        // WARNING: there are no matching reference file for this method
+
+        /*
+        temp = 1
+        if op1 = op2 goto $labelEnd
+        temp = 0
+        $labelEnd: use temp
+         */
+
+        C3aTemp temp = c3a.newTemp();
+        C3aLabel labelEnd = c3a.newAutoLabel();
+
+        C3aOperand op1 = node.getOp1().accept(this);
+        C3aOperand op2 = node.getOp2().accept(this);
+
+        c3a.ajouteInst(new C3aInstAffect(new C3aConstant(1), temp, ""));
+        c3a.ajouteInst(new C3aInstJumpIfEqual(op1, op2, labelEnd, ""));
+        c3a.ajouteInst(new C3aInstAffect(new C3aConstant(0), temp, ""));
+        c3a.addLabelToNextInst(labelEnd);
+
+        return temp;
+    }
+
+    @Override
+    public C3aOperand visit(SaExpNot node) {
+        /*
+        temp = 0
+        if op1 = 1 goto end
+        temp = 1
+        $end: use temp
+         */
+
+        // TODO: la grammaire n'a pas de '!'?
+
+        C3aTemp temp = c3a.newTemp();
+        C3aLabel labelEnd = c3a.newAutoLabel();
+
+        C3aOperand op1 = node.getOp1().accept(this);
+
+        c3a.ajouteInst(new C3aInstAffect(new C3aConstant(0), temp, ""));
+        c3a.ajouteInst(new C3aInstJumpIfEqual(op1, new C3aConstant(1), labelEnd, ""));
+        c3a.ajouteInst(new C3aInstAffect(new C3aConstant(1), temp, ""));
+
+        c3a.addLabelToNextInst(labelEnd);
+        return temp;
+    }
+
+    @Override
+    public C3aOperand visit(SaExpLire node) {
+        // TODO: pas idéal
+        C3aTemp temp = c3a.newTemp();
+        c3a.ajouteInst(new C3aInstRead(temp, ""));
+        return temp;
+    }
 }
