@@ -1,3 +1,4 @@
+import c3a.C3a;
 import sa.Sa2Xml;
 import sa.SaNode;
 import sc.lexer.Lexer;
@@ -6,6 +7,8 @@ import sc.parser.Parser;
 import ts.Ts;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,9 +67,11 @@ public class Compiler {
 
                 checkTS(baseName);
 
-                /*/*System.out.println("[C3A]");
+                System.out.println("[C3A]");
                 C3a c3a = new Sa2c3a(saRoot, table).getC3a();
                 c3a.affiche(baseName);
+
+                checkC3a(baseName);
 
                 /*System.out.println("[NASM]");
                 Nasm nasm = new C3a2nasm(c3a, table).getNasm();
@@ -115,5 +120,9 @@ public class Compiler {
 
     private static void checkTS(String baseName) {
         checkGenFiles(baseName, "ts");
+    }
+
+    private static void checkC3a(String baseName) {
+        checkGenFiles(baseName, "c3a");
     }
 }

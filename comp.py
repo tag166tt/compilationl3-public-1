@@ -37,6 +37,15 @@ def check_ts(base_file_name):
     run_checks(gen_ts_file, ref_ts_file)
 
 
+def check_c3a(base_file_name):
+    base_c3a_ref_directory = 'test/c3a-ref-tom/'
+
+    gen_c3a_file = f'{base_gen_directory}{base_file_name}.c3a'
+    ref_c3a_file = f'{base_c3a_ref_directory}{base_file_name}.c3a'
+
+    run_checks(gen_c3a_file, ref_c3a_file)
+
+
 def main():
     if len(sys.argv) != 3:
         print(f'Usage: python {sys.argv[0]} type_to_compare baseFileName')
@@ -46,6 +55,8 @@ def main():
         check_sa(sys.argv[2])
     elif sys.argv[1] == 'ts':
         check_ts(sys.argv[2])
+    elif sys.argv[1] == 'c3a':
+        check_c3a(sys.argv[2])
     else:
         print(f'Unsuported mode {sys.argv[1]}', file=sys.stderr)
 
