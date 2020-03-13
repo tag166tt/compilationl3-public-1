@@ -1,245 +1,219 @@
+#! /usr/bin/python3
+
+import sys
 import os
 import subprocess
-import sys
 
+# Paths relative to this file (evaluate.py)
+inputPath = "./input/"
+refPath = "./"
+srcPath = "../src/"
+compareArbres="./compare_arbres/compare_arbres_xml"
+# Keep empty
 classpath = ""
 
-
 ################################################################################
-def compile_compiler():
-    print("Compiling Compiler.java...", end="", file=sys.stderr)
-    return_code = subprocess.Popen("cd ../src/ && javac Compiler.java", shell=True, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE).wait()
-    if return_code == 0:
-        print("Done", file=sys.stderr)
-    else:
-        print("ERROR !", file=sys.stderr)
-    print("", file=sys.stderr)
-
-
+def compileCompiler() :
+  print("Compiling Compiler.java...", end="", file=sys.stderr)
+  returnCode = subprocess.Popen("cd %s && javac Compiler.java"%srcPath, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait()
+  if returnCode == 0 :
+    print("Done", file=sys.stderr)
+  else :
+    print("ERROR !", file=sys.stderr)
+  print("", file=sys.stderr)
 ################################################################################
 
 ################################################################################
-def delete_classes():
-    for root, subdirs, files in os.walk(".."):
-        if ".git" in root:
-            continue
-        for filename in files:
-            if os.path.splitext(filename)[1] == ".class":
-                os.remove(root + "/" + filename)
+def deleteClasses() :
 
+  for root, subdirs, files in os.walk("%s.."%srcPath) :
+    if ".git" in root :
+      continue
+    for filename in files :
+      if os.path.splitext(filename)[1] == ".class" :
+        os.remove(root+"/"+filename)
+        
+  return classpath
+################################################################################
+
+################################################################################
+def findClasspath() :
+  global classpath
+
+  if len(classpath) > 0 :
     return classpath
 
-
+  for root, subdirs, files in os.walk("%s.."%srcPath) :
+    if ".git" in root :
+      continue
+    for filename in files :
+      if os.path.splitext(filename)[1] == ".class" :
+        classpath += ("" if len(classpath) == 0 else ":") + root
+        break
+        
+  return classpath
 ################################################################################
 
 ################################################################################
-def find_classpath():
-    global classpath
-
-    if len(classpath) > 0:
-        return classpath
-
-    for root, subdirs, files in os.walk(".."):
-        if ".git" in root:
-            continue
-        for filename in files:
-            if os.path.splitext(filename)[1] == ".class":
-                classpath += ("" if len(classpath) == 0 else ":") + root
-                break
-
-    return classpath
-
-
+def compiler() :
+  return "java -classpath %s Compiler"%findClasspath()
 ################################################################################
 
 ################################################################################
-def compiler():
-    return "java -classpath %s Compiler" % find_classpath()
-
-
+def green(string) :
+  return "\033[92m%s\033[0m"%string
 ################################################################################
 
 ################################################################################
-def green(string):
-    return "\033[92m%s\033[0m" % string
-
-
+def purple(string) :
+  return "\033[95m%s\033[0m"%string
 ################################################################################
 
 ################################################################################
-def purple(string):
-    return "\033[95m%s\033[0m" % string
-
-
+def red(string) :
+  return "\033[91m%s\033[0m"%string
 ################################################################################
 
 ################################################################################
-def red(string):
-    return "\033[91m%s\033[0m" % string
-
-
+def changeExtension(filename, newExtension) :
+  return os.path.splitext(filename)[0] + newExtension
 ################################################################################
 
 ################################################################################
-def change_extension(filename, new_extension):
-    return os.path.splitext(filename)[0] + new_extension
-
-
+def findInputFiles() :
+  inputFiles = []
+  for filename in os.listdir(inputPath) :
+    if os.path.splitext(filename)[1] == ".l" :
+      inputFiles.append(filename)
+  return inputFiles
 ################################################################################
 
 ################################################################################
-def find_input_files():
-    input_files = []
-    for filename in os.listdir('input'):
-        if os.path.splitext(filename)[1] == ".l":
-            input_files.append(filename)
-    return input_files
-
-
+def deleteCompilationOutputs() :
+  outputExtensions = [".sa", ".sc", ".ts", ".nasm", ".pre-nasm", ".c3a", ".fg", ".fgs", ".ig"]
+  for filename in os.listdir(inputPath) :
+    if os.path.splitext(filename)[1] in outputExtensions :
+      os.remove(inputPath+filename)
 ################################################################################
 
 ################################################################################
-def delete_compilation_outputs():
-    output_extensions = [".sa", ".sc", ".ts", ".nasm", ".pre-nasm", ".c3a", ".fg", ".fgs", ".ig"]
-    for filename in os.listdir('input'):
-        if os.path.splitext(filename)[1] in output_extensions:
-            os.remove("input/" + filename)
-
-
+def compileInputFiles(inputFiles) :
+  for inputFile in inputFiles :
+    print("Compiling %s..."%inputFile, end="", file=sys.stderr)
+    returnCode = subprocess.Popen("{} {}{}".format(compiler(), inputPath, inputFile), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait()
+    if returnCode == 0 :
+      print("Done", file=sys.stderr)
+    else :
+      print("ERROR !", file=sys.stderr)
+  print("", file=sys.stderr)
 ################################################################################
 
 ################################################################################
-def compile_input_files(input_files):
-    for inputFile in input_files:
-        print("Compiling %s..." % inputFile, end="", file=sys.stderr)
-        return_code = subprocess.Popen("{} input/{}".format(compiler(), inputFile), shell=True, stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE).wait()
-        if return_code == 0:
-            print("Done", file=sys.stderr)
-        else:
-            print("ERROR !", file=sys.stderr)
-    print("", file=sys.stderr)
-
-
+def getNewEvaluationResult(name) :
+  return [name, {"correct" : [], "incorrect" : [], "notfound" : []}]
 ################################################################################
 
 ################################################################################
-def get_new_evaluation_result(name):
-    return [name, {"correct": [], "incorrect": [], "notfound": []}]
+def evaluateSa(inputFiles) :
+  evaluation = getNewEvaluationResult("Syntaxe Abstraite")
+  if not os.path.isfile(compareArbres) :
+    print("Executable non trouvé : %s (il faut le compiler)"%compareArbres, file=sys.stderr)
+    exit(1)
 
+  for filename in inputFiles :
+    saFilename = changeExtension(filename, ".sa")
+    if not os.path.isfile(inputPath+saFilename) :
+      evaluation[1]["notfound"].append(saFilename)
+      continue
+    
+    saRef = refPath+"sa-ref/"+saFilename
+    if not os.path.isfile(saRef) :
+      print("Fichier non trouvé : %s"%saRef, file=sys.stderr)
+      exit(1)
 
+    res = subprocess.Popen("{} {} {}{}".format(compareArbres, saRef, inputPath, saFilename), shell=True, stdout=open(os.devnull, "w"), stderr=subprocess.PIPE).stderr.read()
+    if "egaux" in str(res) :
+      evaluation[1]["correct"].append(saFilename)
+    else :
+      evaluation[1]["incorrect"].append(saFilename)
+
+  return evaluation
 ################################################################################
 
 ################################################################################
-def evaluate_sa(input_files):
-    evaluation = get_new_evaluation_result("Syntaxe Abstraite")
-    compare_arbres = "compare_arbres/compare_arbres_xml"
-    if not os.path.isfile(compare_arbres):
-        print("Executable non trouvé : %s (il faut le compiler)" % compare_arbres, file=sys.stderr)
-        exit(1)
+def evaluateDiff(inputFiles, extension, path, name) :
+  evaluation = getNewEvaluationResult(name)
 
-    for filename in input_files:
-        sa_filename = change_extension(filename, ".sa")
-        if not os.path.isfile("input/" + sa_filename):
-            evaluation[1]["notfound"].append(sa_filename)
-            continue
+  for filename in inputFiles :
+    producedFile = changeExtension(filename, extension)
+    if not os.path.isfile(inputPath+producedFile) :
+      evaluation[1]["notfound"].append(producedFile)
+      continue
+    
+    ref = refPath+path+producedFile
+    if not os.path.isfile(ref) :
+      print("Fichier non trouvé : %s"%ref, file=sys.stderr)
+      exit(1)
 
-        sa_ref = "sa-ref/" + sa_filename
-        if not os.path.isfile(sa_ref):
-            print("Fichier non trouvé : %s" % sa_ref, file=sys.stderr)
-            exit(1)
+    res = subprocess.Popen("diff {} {}{}".format(ref, inputPath, producedFile), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read()
+    if len(res.strip()) == 0 :
+      evaluation[1]["correct"].append(producedFile)
+    else :
+      evaluation[1]["incorrect"].append(producedFile)
 
-        res = subprocess.Popen("{} {} input/{}".format(compare_arbres, sa_ref, sa_filename), shell=True,
-                               stdout=open(os.devnull, "w"), stderr=subprocess.PIPE).stderr.read()
-        if "egaux" in str(res):
-            evaluation[1]["correct"].append(sa_filename)
-        else:
-            evaluation[1]["incorrect"].append(sa_filename)
-
-    return evaluation
-
-
+  return evaluation
 ################################################################################
 
 ################################################################################
-def evaluate_diff(input_files, extension, path, name):
-    evaluation = get_new_evaluation_result(name)
-
-    for filename in input_files:
-        produced_file = change_extension(filename, extension)
-        if not os.path.isfile("input/" + produced_file):
-            evaluation[1]["notfound"].append(produced_file)
-            continue
-
-        ref = path + produced_file
-        if not os.path.isfile(ref):
-            print("Fichier non trouvé : %s" % ref, file=sys.stderr)
-            exit(1)
-
-        res = subprocess.Popen("diff {} input/{}".format(ref, produced_file), shell=True, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE).stdout.read()
-        if len(res.strip()) == 0:
-            evaluation[1]["correct"].append(produced_file)
-        else:
-            evaluation[1]["incorrect"].append(produced_file)
-
-    return evaluation
-
-
+def printListElements(destination, elements, colorFunction, useColor, resultStr) :
+  if len(elements) == 0 :
+    return
+  maxColumnSize = len(max(elements, key=len))
+  for filename in elements :
+    if useColor :
+      print("\t{}".format(colorFunction(filename)), file=destination)
+    else :
+      print("\t{:{}} {}".format(filename, maxColumnSize+2, resultStr), file=destination)
 ################################################################################
 
 ################################################################################
-def print_list_elements(destination, elements, color_function, use_color, result_str):
-    if len(elements) == 0:
-        return
-    max_column_size = len(max(elements, key=len))
-    for filename in elements:
-        if use_color:
-            print("\t{}".format(color_function(filename)), file=destination)
-        else:
-            print("\t{:{}} {}".format(filename, max_column_size + 2, result_str), file=destination)
+def printEvaluationResult(destination, evaluationResult, useColor) :
+  name = evaluationResult[0]
+  correct = evaluationResult[1]["correct"]
+  incorrect = evaluationResult[1]["incorrect"]
+  notfound = evaluationResult[1]["notfound"]
 
+  nbCorrect = len(correct)
+  nbTotal = len(correct) + len(incorrect) + len(notfound)
 
+  print("Évaluation de %s :"%name, file=destination)
+  print("{}/{} correct ({:6.2f}%)".format(nbCorrect, nbTotal, 100.0*nbCorrect/nbTotal), file=destination)
+  printListElements(destination, correct, green, useColor, "CORRECT")
+  printListElements(destination, incorrect, purple, useColor, "INCORRECT")
+  printListElements(destination, notfound, red, useColor, "NON-EXISTANT")
 ################################################################################
 
 ################################################################################
-def print_evaluation_result(destination, evaluation_result, use_color):
-    name = evaluation_result[0]
-    correct = evaluation_result[1]["correct"]
-    incorrect = evaluation_result[1]["incorrect"]
-    notfound = evaluation_result[1]["notfound"]
+if __name__ == "__main__" :
 
-    nb_correct = len(correct)
-    nb_total = len(correct) + len(incorrect) + len(notfound)
+  inputFiles = findInputFiles()
+  deleteCompilationOutputs()
 
-    print("Évaluation de %s :" % name, file=destination)
-    print("{}/{} correct ({:6.2f}%)".format(nb_correct, nb_total, 100.0 * nb_correct / nb_total), file=destination)
-    print_list_elements(destination, correct, green, use_color, "CORRECT")
-    print_list_elements(destination, incorrect, purple, use_color, "INCORRECT")
-    print_list_elements(destination, notfound, red, use_color, "NON-EXISTANT")
+  compileCompiler()
+  compileInputFiles(inputFiles)
+  deleteClasses()
 
+  saEvaluation = evaluateSa(inputFiles)
+  tsEvaluation = evaluateDiff(inputFiles, ".ts", "ts-ref/", "Table des Symboles")
+  c3aEvaluation = evaluateDiff(inputFiles, ".c3a", "c3a-ref/", "Code 3 Adresses")
 
+  useColor = True
+
+  if useColor :
+    print("Légende : {}  {}  {}".format(green("CORRECT"), purple("INCORRECT"), red("NON-EXISTANT")))
+
+  printEvaluationResult(sys.stdout, saEvaluation, useColor)
+  printEvaluationResult(sys.stdout, tsEvaluation, useColor)
+  printEvaluationResult(sys.stdout, c3aEvaluation, useColor)
 ################################################################################
 
-################################################################################
-if __name__ == "__main__":
-
-    inputFiles = find_input_files()
-    delete_compilation_outputs()
-
-    compile_compiler()
-    compile_input_files(inputFiles)
-    delete_classes()
-
-    saEvaluation = evaluate_sa(inputFiles)
-    tsEvaluation = evaluate_diff(inputFiles, ".ts", "ts-ref/", "Table des Symboles")
-
-    useColor = True
-
-    if useColor:
-        print("Légende : {}  {}  {}".format(green("CORRECT"), purple("INCORRECT"), red("NON-EXISTANT")))
-
-    print_evaluation_result(sys.stdout, saEvaluation, useColor)
-    print_evaluation_result(sys.stdout, tsEvaluation, useColor)
-################################################################################
