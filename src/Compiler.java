@@ -1,5 +1,4 @@
 import c3a.C3a;
-import c3a.C3aEval;
 import nasm.Nasm;
 import sa.Sa2Xml;
 import sa.SaNode;
@@ -30,38 +29,33 @@ public class Compiler
 	    e.printStackTrace();
 	}
 	try {
-	    // Create a Parser instance.
-	    Parser p = new Parser(new Lexer(br));
-	    // Parse the input.
-	    System.out.print("[BUILD SC] ");
-	    Start tree = p.parse();
+        // Create a Parser instance.
+        Parser p = new Parser(new Lexer(br));
+        // Parse the input.
+        Start tree = p.parse();
 
-	    System.out.println("[PRINT SC]");
-	    tree.apply(new Sc2Xml(baseName));
+        System.out.println("[SC]");
+        tree.apply(new Sc2Xml(baseName));
 
-	    System.out.print("[BUILD SA] ");
-	    Sc2sa sc2sa = new Sc2sa();
-	    tree.apply(sc2sa);
-	    SaNode saRoot = sc2sa.getRoot();
+        System.out.println("[SA]");
+        Sc2sa sc2sa = new Sc2sa();
+        tree.apply(sc2sa);
+        SaNode saRoot = sc2sa.getRoot();
+        new Sa2Xml(saRoot, baseName);
 
-	    System.out.println("[PRINT SA]");
-	    new Sa2Xml(saRoot, baseName);
+        checkSA(baseName);
 
-	    System.out.print("[BUILD TS] ");
-	    Ts table = new Sa2ts(saRoot).getTableGlobale();
+        System.out.println("[TABLE SYMBOLES]");
+        Ts table = new Sa2ts(saRoot).getTableGlobale();
+        table.afficheTout(baseName);
 
-	    System.out.println("[PRINT TS]");
-	    table.afficheTout(baseName);
+        checkTS(baseName);
 
-	    System.out.print("[BUILD C3A]");
-	    C3a c3a = new Sa2c3a(saRoot, table).getC3a();
+        System.out.println("[C3A]");
+        C3a c3a = new Sa2c3a(saRoot, table).getC3a();
+        c3a.affiche(baseName);
 
-	    System.out.print("[PRINT C3A] ");
-	    c3a.affiche(baseName);
-
-        System.out.println("[PRINT C3A OUT]");
-        C3aEval c3aEval = new C3aEval(c3a, table);
-        c3aEval.affiche(baseName);
+        checkC3a(baseName);
 
         System.out.print("[BUILD PRE NASM] ");
         Nasm nasm = new C3a2nasm(c3a, table).getNasm();
@@ -73,7 +67,6 @@ public class Compiler
         Fg fg = new Fg(nasm);
         System.out.print("[PRINT FG] ");
         fg.affiche(baseName);
-
         System.out.println("[SOLVE FG]");
         FgSolution fgSolution = new FgSolution(nasm, fg);
         fgSolution.affiche(baseName);
@@ -116,5 +109,9 @@ public class Compiler
 
     private static void checkC3a(String baseName) {
         checkGenFiles(baseName, "c3a");
+    }
+
+    private static void checkNASM(String baseNAme) {
+        checkGenFiles(baseNAme, "nasm");
     }
 }
