@@ -111,7 +111,11 @@ public class Compiler
         checkGenFiles(baseName, "c3a");
     }
 
-    private static void checkNASM(String baseNAme) {
-        checkGenFiles(baseNAme, "nasm");
+    private static void checkPreNASM(String baseName) {
+        checkGenFiles(baseName, "prenasm");
+    }
+
+    private static void checkNASM(String baseName) {
+        checkGenFiles(baseName, "nasm");
     }
 }
