@@ -8,59 +8,78 @@ import sc.parser.Parser;
 import ts.Ts;
 
 import java.io.*;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 //import fg.*;
 
-public class Compiler
-{
-    public static void main(String[] args)
-    {
-	PushbackReader br = null;
-	String baseName = null;
-	try {
-	    if (0 < args.length) {
-		br = new PushbackReader(new FileReader(args[0]), 1024);
-		baseName = removeSuffix(args[0], ".l");
-	    }
-	    else{
-		System.out.println("il manque un argument");
-	    }
-	}
-	catch (IOException e) {
-	    e.printStackTrace();
-	}
-	try {
-        // Create a Parser instance.
-        Parser p = new Parser(new Lexer(br));
-        // Parse the input.
-        Start tree = p.parse();
+public class Compiler {
+    public static void main(String[] args) {
+        List<String> fileNames = new ArrayList<>();
 
-        System.out.println("[SC]");
-        tree.apply(new Sc2Xml(baseName));
+        File folder = Paths.get("test", "input").toFile();
+        File[] listOfFiles = folder.listFiles();
 
-        System.out.println("[SA]");
-        Sc2sa sc2sa = new Sc2sa();
-        tree.apply(sc2sa);
-        SaNode saRoot = sc2sa.getRoot();
-        new Sa2Xml(saRoot, baseName);
+        assert listOfFiles != null;
+        for (File listOfFile : listOfFiles) {
+            if (listOfFile.isFile() && listOfFile.getName().endsWith(".l") && listOfFile.getName().contains("appel")) {
+                fileNames.add(listOfFile.getAbsolutePath());
+            }
+        }
 
-        checkSA(baseName);
+        //fileNames = Collections.singletonList(fileNames.get(0));
 
-        System.out.println("[TABLE SYMBOLES]");
-        Ts table = new Sa2ts(saRoot).getTableGlobale();
-        table.afficheTout(baseName);
+        for (String fileName : fileNames) {
+            PushbackReader br = null;
+            String baseName;
 
-        checkTS(baseName);
+            try {
+                br = new PushbackReader(new FileReader(fileName), 1024);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
 
-        System.out.println("[C3A]");
-        C3a c3a = new Sa2c3a(saRoot, table).getC3a();
-        c3a.affiche(baseName);
+            baseName = removeSuffix(fileName, ".l");
 
-        checkC3a(baseName);
+            System.out.println();
+            System.out.println(String.format("File base name: %s", baseName));
 
-        System.out.print("[BUILD PRE NASM] ");
-        Nasm nasm = new C3a2nasm(c3a, table).getNasm();
-        System.out.println("[PRINT PRE NASM] ");
-        nasm.affichePre(baseName);
+            try {
+                // Create a Parser instance.
+                Parser p = new Parser(new Lexer(br));
+                // Parse the input.
+                Start tree = p.parse();
+
+                System.out.println("[SC]");
+                tree.apply(new Sc2Xml(baseName));
+
+                System.out.println("[SA]");
+                Sc2sa sc2sa = new Sc2sa();
+                tree.apply(sc2sa);
+                SaNode saRoot = sc2sa.getRoot();
+                new Sa2Xml(saRoot, baseName);
+
+                checkSA(baseName);
+
+                System.out.println("[TABLE SYMBOLES]");
+                Ts table = new Sa2ts(saRoot).getTableGlobale();
+                table.afficheTout(baseName);
+
+                checkTS(baseName);
+
+                System.out.println("[C3A]");
+                C3a c3a = new Sa2c3a(saRoot, table).getC3a();
+                c3a.affiche(baseName);
+
+                checkC3a(baseName);
+
+                System.out.print("[BUILD PRE NASM] ");
+                Nasm nasm = new C3a2nasm(c3a, table).getNasm();
+                System.out.println("[PRINT PRE NASM] ");
+                nasm.affichePre(baseName);
+
+                checkPreNASM(baseName);
 
         /*
         System.out.print("[BUILD FG] ");
@@ -71,10 +90,13 @@ public class Compiler
         FgSolution fgSolution = new FgSolution(nasm, fg);
         fgSolution.affiche(baseName);
         */
-    }
-	catch(Exception e){
-	    System.out.println(e.getMessage());
-	}
+            } catch (Exception e) {
+                System.out.println("e.getClass().getSimpleName() = " + e.getClass().getSimpleName());
+                e.printStackTrace();
+                System.out.println("Patate");
+                System.out.println(e.getMessage());
+            }
+        }
     }
 
     public static String removeSuffix(final String s, final String suffix) {

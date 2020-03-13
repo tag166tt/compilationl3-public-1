@@ -47,19 +47,19 @@ def check_c3a(base_file_name):
 
 
 def check_pre_nasm(base_file_name):
-    base_pre_nasm_ref_directory = 'test/prenasm-ref'
+    base_pre_nasm_ref_directory = 'test/prenasm-ref/'
 
-    gen_pre_nasm_file = f'{base_gen_directory}{base_file_name}'
-    ref_pre_nasm_file = f'{base_pre_nasm_ref_directory}{base_file_name}'
+    gen_pre_nasm_file = f'{base_gen_directory}{base_file_name}.pre-nasm'
+    ref_pre_nasm_file = f'{base_pre_nasm_ref_directory}{base_file_name}.pre-nasm'
 
     run_checks(gen_pre_nasm_file, ref_pre_nasm_file)
 
 
 def check_nasm(base_file_name):
-    base_pre_nasm_ref_directory = 'test/nasm-ref'
+    base_pre_nasm_ref_directory = 'test/nasm-ref/'
 
-    gen_nasm_file = f'{base_gen_directory}{base_file_name}'
-    ref_nasm_file = f'{base_pre_nasm_ref_directory}{base_file_name}'
+    gen_nasm_file = f'{base_gen_directory}{base_file_name}.nasm'
+    ref_nasm_file = f'{base_pre_nasm_ref_directory}{base_file_name}.nasm'
 
     run_checks(gen_nasm_file, ref_nasm_file)
 
