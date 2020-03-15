@@ -1,4 +1,0 @@
-main	fbegin	#entree fonction
-	a = 123
-	write a	
-	fend

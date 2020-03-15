@@ -38,12 +38,30 @@ def check_ts(base_file_name):
 
 
 def check_c3a(base_file_name):
-    base_c3a_ref_directory = 'test/c3a-ref-tom/'
+    base_c3a_ref_directory = 'test/c3a-ref/'
 
     gen_c3a_file = f'{base_gen_directory}{base_file_name}.c3a'
     ref_c3a_file = f'{base_c3a_ref_directory}{base_file_name}.c3a'
 
     run_checks(gen_c3a_file, ref_c3a_file)
+
+
+def check_pre_nasm(base_file_name):
+    base_pre_nasm_ref_directory = 'test/prenasm-ref/'
+
+    gen_pre_nasm_file = f'{base_gen_directory}{base_file_name}.pre-nasm'
+    ref_pre_nasm_file = f'{base_pre_nasm_ref_directory}{base_file_name}.pre-nasm'
+
+    run_checks(gen_pre_nasm_file, ref_pre_nasm_file)
+
+
+def check_nasm(base_file_name):
+    base_pre_nasm_ref_directory = 'test/nasm-ref/'
+
+    gen_nasm_file = f'{base_gen_directory}{base_file_name}.nasm'
+    ref_nasm_file = f'{base_pre_nasm_ref_directory}{base_file_name}.nasm'
+
+    run_checks(gen_nasm_file, ref_nasm_file)
 
 
 def main():
@@ -57,6 +75,10 @@ def main():
         check_ts(sys.argv[2])
     elif sys.argv[1] == 'c3a':
         check_c3a(sys.argv[2])
+    elif sys.argv[1] == 'prenasm':
+        check_pre_nasm(sys.argv[2])
+    elif sys.argv[1] == 'nasm':
+        check_nasm(sys.argv[2])
     else:
         print(f'Unsuported mode {sys.argv[1]}', file=sys.stderr)
 
