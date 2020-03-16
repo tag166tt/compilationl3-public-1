@@ -12,7 +12,7 @@ generated files automatically when launching the compiler. Just add the proper s
 - [x] TP1 Analyse syntaxique
 - [x] TP2 Construction de l'arbre abstrait
 - [x] TP3 Construction de la table des symboles
-- [ ] TP4-5 Production du code trois adresses
+- [x] TP4-5 Production du code trois adresses
 - [ ] TP6 Production du code assembleur
 - [ ] TP7 Production du graphe de flot
 - [ ] TP8 Allocation de registres
