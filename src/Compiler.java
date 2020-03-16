@@ -22,7 +22,7 @@ public class Compiler {
 
         assert listOfFiles != null;
         for (File listOfFile : listOfFiles) {
-            if (listOfFile.isFile() && listOfFile.getName().endsWith(".l") && listOfFile.getName().contains("appel")) {
+            if (listOfFile.isFile() && listOfFile.getName().endsWith(".l") && listOfFile.getName().contains("")) {
                 fileNames.add(listOfFile.getAbsolutePath());
             }
         }
