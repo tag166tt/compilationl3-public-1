@@ -1,4 +1,5 @@
 import sys
+import itertools
 
 
 def run_checks(gen_file, ref_file):
@@ -14,6 +15,57 @@ def run_checks(gen_file, ref_file):
 
     except Exception as e:
         print(e, file=sys.stderr)
+
+
+def run_check_pre_nasm(gen_file, ref_file):
+    '''Doesn't account for comments or register numbers.'''
+
+    try:
+        with open(gen_file, 'r') as f:
+            gen_f = f.read()
+
+        with open(ref_file, 'r') as f:
+            ref_f = f.read()
+
+        if gen_f == ref_f:
+            return True
+
+        lines_gen = gen_f.split('\n')
+        lines_ref = ref_f.split('\n')
+
+        if len(lines_gen) != len(lines_ref):
+            return False
+
+        # Remove comments
+        lines_gen = [l.split(';', 1)[0].strip() for l in lines_gen]
+        lines_ref = [l.split(';', 1)[0].strip() for l in lines_ref]
+
+        gen_f = "\n".join(lines_gen)
+        ref_f = "\n".join(lines_ref)
+
+        # There are 8 general purpose registers
+
+        # Iterate over all permutations of the registers we want to try
+        for comb in itertools.permutations(range(8)):
+            # Copy text
+            temp = gen_f
+
+            # First rewrite to temp variables (to avoid replacing multiple times without knowing it)
+            for a in range(8):
+                temp_name = f"$TEMP{a}$"
+                temp = temp.replace(f"r{a}", temp_name)
+
+            # Then replace those temp variables with the intended registers
+            for a, b in zip(range(8), comb):
+                temp_name = f"$TEMP{a}$"
+                temp = temp.replace(temp_name, f"r{b}")
+
+            if temp == ref_f:
+                return True
+    except Exception as e:
+        print(e, file=sys.stderr)
+
+    return False
 
 
 base_gen_directory = 'test/input/'
@@ -52,7 +104,8 @@ def check_pre_nasm(base_file_name):
     gen_pre_nasm_file = f'{base_gen_directory}{base_file_name}.pre-nasm'
     ref_pre_nasm_file = f'{base_pre_nasm_ref_directory}{base_file_name}.pre-nasm'
 
-    run_checks(gen_pre_nasm_file, ref_pre_nasm_file)
+    if not run_check_pre_nasm(gen_pre_nasm_file, ref_pre_nasm_file):
+        print(False, '\t', gen_pre_nasm_file, ref_pre_nasm_file, file=sys.stderr)
 
 
 def check_nasm(base_file_name):
