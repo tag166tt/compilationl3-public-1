@@ -109,6 +109,7 @@ public class Sa2ts extends SaDepthFirstVisitor<Void> {
         if (variable == null) throw new TsException("The variable '%s' is not declared.", node.nom);
         // TODO: pas de moyen autre de différencier les types...
         if (variable.taille > 1) throw new TsException("Trying to use the variable '%s' as an integer, but it is an array.", node.nom);
+        node.tsItem = variable;
         return super.visit(node);
     }
 
@@ -119,6 +120,7 @@ public class Sa2ts extends SaDepthFirstVisitor<Void> {
         if (variable == null) throw new TsException("The variable '%s' is not declared.", node.getNom());
         // TODO: pas de moyen de vérifier si la variable est bien un tableau, on a pas le type (taille = 1 pour variable
         //  normale)
+        node.tsItem = variable;
         return super.visit(node);
     }
 
@@ -133,6 +135,7 @@ public class Sa2ts extends SaDepthFirstVisitor<Void> {
         if (fonction.nbArgs != nodeArgsLength)
             throw new TsException("Trying to call the function '%s' with %d arguments, but that function takes %d arguments.", node.getNom(), nodeArgsLength, fonction.nbArgs);
 
+        node.tsItem = fonction;
         return super.visit(node);
     }
 
