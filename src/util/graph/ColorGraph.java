@@ -1,101 +1,152 @@
 package util.graph;
 
 import util.intset.IntSet;
+import util.intset.IntSetUtils;
 
+import java.util.Arrays;
 import java.util.Stack;
 
 public class ColorGraph {
-    static int NOCOLOR = -1;
-    public Graph G;
-    public int R;
-    public int K;
-    public IntSet enleves;
-    public IntSet deborde;
-    public int[] couleur;
-    public Node[] int2Node;
-    private Stack<Integer> pile;
 
-    public ColorGraph(Graph G, int K, int[] phi) {
-        this.G = G;
-        this.K = K;
-        pile = new Stack<Integer>();
-        R = G.nodeCount();
-        couleur = new int[R];
-        enleves = new IntSet(R);
-        deborde = new IntSet(R);
+    private final static int NOCOLOR = -1;
+
+    private final int tempRegistersNb;
+    private final int colorsNb;
+    private final IntSet removed;
+    private final IntSet overflowed;
+    private final int[] colors;
+    private final Node[] int2Node;
+    private final Stack<Integer> stack = new Stack<>();
+
+    public ColorGraph(Graph G, int colorsNb, int[] preColored) {
+        this.colorsNb = colorsNb;
+        tempRegistersNb = G.nodeCount(); // TODO
+        colors = new int[tempRegistersNb];
+        removed = new IntSet(tempRegistersNb);
+        overflowed = new IntSet(tempRegistersNb);
         int2Node = G.nodeArray();
-        for (int v = 0; v < R; v++) {
-            int preColor = phi[v];
-            if (preColor >= 0 && preColor < K)
-                couleur[v] = phi[v];
+        initializeColors(preColored);
+    }
+
+    /**
+     * Initializes the {@link ColorGraph#colors} array, setting each element to either
+     * {@link ColorGraph#NOCOLOR} or the passed color.
+     * @param preColored The starting colors.
+     */
+    private void initializeColors(int[] preColored) {
+        for (int v = 0; v < tempRegistersNb; v++) {
+            int preColor = preColored[v];
+
+            if (preColor >= 0 && preColor < colorsNb)
+                colors[v] = preColored[v];
             else
-                couleur[v] = NOCOLOR;
+                colors[v] = NOCOLOR;
         }
     }
 
-    /*-------------------------------------------------------------------------------------------------------------*/
-    /* associe une couleur à tous les sommets se trouvant dans la pile */
-    /*-------------------------------------------------------------------------------------------------------------*/
-
-    public void selection() {
+    /**
+     * Colors the graph.
+     * @return The created colors.
+     */
+    public int[] color() {
+        this.simplify();
+        this.overflow();
+        this.select();
+        return colors;
     }
 
-    /*-------------------------------------------------------------------------------------------------------------*/
-    /* récupère les couleurs des voisins de t */
-    /*-------------------------------------------------------------------------------------------------------------*/
+    public void simplify() {
+        int N = tempRegistersNb - countColored();
+        boolean modif = true;
 
-    public IntSet couleursVoisins(int t) {
-        throw new RuntimeException("Not implemented yet");
+        while (stack.size() != N && modif) {
+            modif = false;
+
+            for (int s = 0; s < int2Node.length; s++) {
+                if (neighborsCount(s) >= colorsNb || removed.isMember(s) || colors[s] != NOCOLOR) {
+                    continue;
+                }
+                stack.add(s);
+                removed.add(s);
+                modif = true;
+            }
+        }
     }
 
-    /*-------------------------------------------------------------------------------------------------------------*/
-    /* recherche une couleur absente de colorSet */
-    /*-------------------------------------------------------------------------------------------------------------*/
-
-    public int choisisCouleur(IntSet colorSet) {
-        throw new RuntimeException("Not implemented yet");
+    public void overflow() {
+        while (stack.size() != tempRegistersNb - countColored()) {
+            int s = chooseVertex();
+            if (s < 0) throw new RuntimeException("Could not find a vertex."); // TODO
+            stack.add(s);
+            removed.add(s);
+            overflowed.add(s);
+            simplify();
+        }
     }
 
-    /*-------------------------------------------------------------------------------------------------------------*/
-    /* calcule le nombre de voisins du sommet t */
-    /*-------------------------------------------------------------------------------------------------------------*/
+    /**
+     * Colors all of the vertices in the stack.
+     */
+    public void select() {
+        while (!stack.empty()) {
+            int s = stack.pop();
+            IntSet C = neighborsColors(s);
 
-    public int nbVoisins(int t) {
-        throw new RuntimeException("Not implemented yet");
+            if (C.getSize() != colorsNb - countColored())
+                colors[s] = chooseColor(C);
+        }
     }
 
-    /*-------------------------------------------------------------------------------------------------------------*/
-    /* simplifie le graphe d'interférence g                                                                        */
-    /* la simplification consiste à enlever du graphe les temporaires qui ont moins de k voisins                   */
-    /* et à les mettre dans une pile                                                                               */
-    /* à la fin du processus, le graphe peut ne pas être vide, il s'agit des temporaires qui ont au moins k voisin */
-    /*-------------------------------------------------------------------------------------------------------------*/
+    public IntSet neighborsColors(int t) {
+        Node node = int2Node[t];
 
-    public int simplification() {
-        throw new RuntimeException("Not implemented yet");
+        return GraphUtils.streamFromNodeList(node.adj()) // TODO: from adj to succ
+                .map(successor -> colors[successor.mykey])
+                .filter(color -> color != NOCOLOR)
+                .collect(IntSetUtils.toIntSet(colorsNb));
     }
 
-    /*-------------------------------------------------------------------------------------------------------------*/
-    /*-------------------------------------------------------------------------------------------------------------*/
+    public int chooseColor(IntSet colorSet) {
+        for (int i = 0; i < colorsNb; i++)
+            if (!colorSet.isMember(i)) return i;
 
-    public void debordement() {
-        throw new RuntimeException("Not implemented yet");
+        return NOCOLOR;
     }
 
+    public int neighborsCount(int t) {
+        Node node = int2Node[t];
 
-    /*-------------------------------------------------------------------------------------------------------------*/
-    /*-------------------------------------------------------------------------------------------------------------*/
+        // TODO: distinct needed?
 
-    public void coloration() {
-        this.simplification();
-        this.debordement();
-        this.selection();
+        // Count all adjacent nodes
+        return (int) GraphUtils.streamFromNodeList(node.adj()) // TODO: from adj to succ
+                .filter(successor -> !removed.isMember(successor.mykey))
+                .map(successor -> successor.mykey)
+                .distinct()
+                .count();
+    }
+
+    private int countColored() {
+        return (int) Arrays.stream(colors)
+                .filter(c -> c != NOCOLOR)
+                .count();
+    }
+
+    private int chooseVertex() {
+        for (int s = 0; s < int2Node.length; s++) {
+            // pas besoin de vérifier deborde : si x est dans déborde, alors il est dans enleves
+            if (!removed.isMember(s) && colors[s] == NOCOLOR) {
+                return s;
+            }
+        }
+
+        return -1;
     }
 
     void affiche() {
         System.out.println("vertex\tcolor");
-        for (int i = 0; i < R; i++) {
-            System.out.println(i + "\t" + couleur[i]);
+        for (int i = 0; i < tempRegistersNb; i++) {
+            System.out.println(i + "\t" + colors[i]);
         }
     }
 

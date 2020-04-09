@@ -1,6 +1,7 @@
 package util.graph;
 
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class GraphUtils {
     /**
@@ -14,13 +15,9 @@ public class GraphUtils {
      * @return The generated stream.
      */
     public static Stream<Node> streamFromNodeList(NodeList nodeList) {
-        Stream.Builder<Node> streamBuilder = Stream.builder();
+        if (nodeList == null)
+            return Stream.of();
 
-        while (nodeList != null) {
-            streamBuilder.add(nodeList.head);
-            nodeList = nodeList.tail;
-        }
-
-        return streamBuilder.build();
+        return StreamSupport.stream(nodeList.spliterator(), false);
     }
 }
