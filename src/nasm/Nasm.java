@@ -30,7 +30,7 @@ public class Nasm{
 	if(inst instanceof NasmMov && inst.destination instanceof NasmAddress && inst.source instanceof NasmAddress){
 	    NasmRegister newReg = newRegister();
 	    this.listeInst.add(new NasmMov(inst.label, newReg, inst.source, inst.comment)); 
-	    this.listeInst.add(new NasmMov(inst.label, inst.destination, newReg, "on passe par un registre temporaire"));
+	    this.listeInst.add(new NasmMov(null, inst.destination, newReg, "on passe par un registre temporaire"));
 	    return;
 	}
 	
@@ -40,7 +40,7 @@ public class Nasm{
 	       || (inst.destination instanceof NasmAddress && inst.source instanceof NasmAddress))){
 		NasmRegister newReg = newRegister();
 		this.listeInst.add(new NasmMov(inst.label, newReg, inst.destination, inst.comment)); 
-		this.listeInst.add(new NasmCmp(inst.label, newReg, inst.source, "on passe par un registre temporaire"));
+		this.listeInst.add(new NasmCmp(null, newReg, inst.source, "on passe par un registre temporaire"));
 		return;
 	    }
 	
