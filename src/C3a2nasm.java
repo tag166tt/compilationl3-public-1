@@ -261,7 +261,9 @@ public class C3a2nasm implements C3aVisitor<NasmOperand> {
         TsItemFct function = inst.op1.val;
         NasmOperand result = inst.result.accept(this);
 
-        nasm.ajouteInst(new NasmSub(null, esp, new NasmConstant(4), "allocation mémoire pour la valeur de retour"));
+        NasmOperand label = getLabel(inst);
+
+        nasm.ajouteInst(new NasmSub(label, esp, new NasmConstant(4), "allocation mémoire pour la valeur de retour"));
         nasm.ajouteInst(new NasmCall(null, new NasmLabel(function.identif), ""));
         nasm.ajouteInst(new NasmPop(null, result, "récupération de la valeur de retour"));
 
@@ -483,7 +485,8 @@ public class C3a2nasm implements C3aVisitor<NasmOperand> {
         // ebp + 8
         NasmAddress destination = new NasmAddress(ebp, '+', new NasmConstant(2));
 
-        nasm.ajouteInst(new NasmMov(null, destination, source, "ecriture de la valeur de retour"));
+        NasmLabel label = getLabel(inst);
+        nasm.ajouteInst(new NasmMov(label, destination, source, "ecriture de la valeur de retour"));
 
         return null;
     }
