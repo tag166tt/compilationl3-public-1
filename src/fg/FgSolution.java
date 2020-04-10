@@ -1,8 +1,6 @@
 package fg;
 
-import nasm.Nasm;
-import nasm.NasmInst;
-import nasm.NasmRegister;
+import nasm.*;
 import util.graph.GraphUtils;
 import util.graph.Node;
 import util.intset.IntSet;
@@ -42,34 +40,31 @@ public class FgSolution {
 
     private void createInstructionDefSet(NasmInst inst) {
         IntSet defSet = new IntSet(nasm.listeInst.size());
-
-        if (inst.srcDef && inst.source.isGeneralRegister()) {
-            NasmRegister sourceRegister = (NasmRegister) inst.source;
-            defSet.add(sourceRegister.val);
-        }
-
-        if (inst.destDef && inst.destination.isGeneralRegister()) {
-            NasmRegister destinationRegister = (NasmRegister) inst.destination;
-            defSet.add(destinationRegister.val);
-        }
-
+        if (inst.srcDef) addNasmOperand(defSet, inst.source);
+        if (inst.destDef) addNasmOperand(defSet, inst.destination);
         def.put(inst, defSet);
     }
 
     private void createInstructionUseSet(NasmInst inst) {
         IntSet useSet = new IntSet(nasm.listeInst.size());
-
-        if (inst.srcUse && inst.source.isGeneralRegister()) {
-            NasmRegister sourceRegister = (NasmRegister) inst.source;
-            useSet.add(sourceRegister.val);
-        }
-
-        if (inst.destUse && inst.destination.isGeneralRegister()) {
-            NasmRegister destinationRegister = (NasmRegister) inst.destination;
-            useSet.add(destinationRegister.val);
-        }
-
+        if (inst.srcUse) addNasmOperand(useSet, inst.source);
+        if (inst.destUse) addNasmOperand(useSet, inst.destination);
         use.put(inst, useSet);
+    }
+
+    private void addNasmOperand(IntSet to, NasmOperand operand) {
+        if (operand == null) return;
+
+        if (operand instanceof NasmAddress) {
+            NasmAddress address = (NasmAddress) operand;
+            addNasmOperand(to, address.base);
+            addNasmOperand(to, address.offset);
+        }
+
+        if (operand.isGeneralRegister()) {
+            NasmRegister register = (NasmRegister) operand;
+            to.add(register.val);
+        }
     }
 
     /**

@@ -1,10 +1,7 @@
 package ig;
 
 import fg.FgSolution;
-import nasm.Nasm;
-import nasm.NasmInst;
-import nasm.NasmOperand;
-import nasm.NasmRegister;
+import nasm.*;
 import util.graph.ColorGraph;
 import util.graph.Graph;
 import util.graph.Node;
@@ -79,14 +76,25 @@ public class Ig {
                 .flatMap(instruction -> Stream.of(instruction.source, instruction.destination))
                 .collect(Collectors.toList());
 
-        for (NasmOperand operand: operands) {
-            if (operand == null) continue;
-            if (!operand.isGeneralRegister()) continue;
-            NasmRegister register = (NasmRegister) operand;
-            precoloredTemporaries[register.val] = register.color;
-        }
+        for (NasmOperand operand: operands)
+            setOperandColor(precoloredTemporaries, operand);
 
         return precoloredTemporaries;
+    }
+
+    private void setOperandColor(int[] colors, NasmOperand operand) {
+        if (operand == null) return;
+
+        if (operand instanceof NasmAddress) {
+            NasmAddress address = (NasmAddress) operand;
+            setOperandColor(colors, address.base);
+            setOperandColor(colors, address.offset);
+        }
+
+        if (operand.isGeneralRegister()) {
+            NasmRegister register = (NasmRegister) operand;
+            colors[register.val] = register.color;
+        }
     }
 
     public void allocateRegisters() {
@@ -94,19 +102,27 @@ public class Ig {
         int[] colors = colorGraph.color();
 
         for (NasmInst inst: nasm.listeInst) {
-            ArrayList<NasmOperand> ops = new ArrayList<>();
-            if (inst.source != null) ops.add(inst.source);
-            if (inst.destination != null) ops.add(inst.destination);
-            for (NasmOperand op: ops) {
-                if (op.isGeneralRegister()) {
-                    NasmRegister register = (NasmRegister) op;
-                    if (register.color == Nasm.REG_UNK)
-                        register.colorRegister(colors[register.val]);
-                }
-            }
+            allocateRegister(colors, inst.source);
+            allocateRegister(colors, inst.destination);
         }
     }
 
+    private void allocateRegister(int[] colors, NasmOperand operand) {
+        if (operand == null) return;
+
+        if (operand instanceof NasmAddress) {
+            NasmAddress address = (NasmAddress) operand;
+            allocateRegister(colors, address.base);
+            allocateRegister(colors, address.offset);
+        }
+
+        if (operand.isGeneralRegister()) {
+            NasmRegister register = (NasmRegister) operand;
+
+            if (register.color == Nasm.REG_UNK)
+                register.colorRegister(colors[register.val]);
+        }
+    }
 
     public void affiche(String baseFileName) {
         String fileName;
