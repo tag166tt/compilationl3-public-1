@@ -491,6 +491,15 @@ public class C3a2nasm implements C3aVisitor<NasmOperand> {
         if (index != null) {
             // TODO: here too
             NasmOperand indexOperand = index.accept(this);
+
+            // We have to use a temporary value to use a variable as an index
+            // TODO: the next label should be put here instead, this (probably) introduces a new bug
+            if (!(indexOperand instanceof NasmConstant)) {
+                NasmRegister temp = nasm.newRegister();
+                nasm.ajouteInst(new NasmMov(null, temp, indexOperand, ""));
+                indexOperand = temp;
+            }
+
             return new NasmAddress(new NasmLabel(variable.getIdentif()), '+', indexOperand);
         }
 
