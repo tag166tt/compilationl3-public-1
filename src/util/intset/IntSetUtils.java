@@ -11,6 +11,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 public class IntSetUtils {
+    /**
+     * Simple collector that takes a stream of number and packs them in an {@link IntSet}.
+     * @param finalSize The size of the final int set.
+     * @return The built int set.
+     */
     public static Collector<Integer, Set<Integer>, IntSet> toIntSet(int finalSize) {
         Supplier<Set<Integer>> supplier = HashSet::new;
 
@@ -32,6 +37,10 @@ public class IntSetUtils {
         return Collector.of(supplier, accumulator, combiner, finisher, Collector.Characteristics.UNORDERED);
     }
 
+    /**
+     * Creates the cartesian product of the two given sets, as an unmodifiable set of lists (each
+     * with two elements).
+     */
     public static Set<List<Integer>> twoSetsCartesianProduct(IntSet a, IntSet b) {
         Set<List<Integer>> out = new HashSet<>();
 
@@ -46,4 +55,5 @@ public class IntSetUtils {
 
         return Collections.unmodifiableSet(out);
     }
+
 }

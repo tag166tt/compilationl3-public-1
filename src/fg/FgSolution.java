@@ -12,25 +12,25 @@ import java.util.Map;
 
 public class FgSolution {
     public Nasm nasm;
-    public Map<NasmInst, IntSet> use;
-    public Map<NasmInst, IntSet> def;
-    public Map<NasmInst, IntSet> in;
-    public Map<NasmInst, IntSet> out;
-    int iterNum = 0;
-    Fg fg;
+    private final Map<NasmInst, IntSet> use = new HashMap<>();
+    private final Map<NasmInst, IntSet> def = new HashMap<>();
+    public final Map<NasmInst, IntSet> in = new HashMap<>();
+    public final Map<NasmInst, IntSet> out = new HashMap<>();
+    private int iterNum = 0;
+    private final Fg fg;
 
     public FgSolution(Nasm nasm, Fg fg) {
         this.nasm = nasm;
         this.fg = fg;
-        this.use = new HashMap<>();
-        this.def = new HashMap<>();
-        this.in = new HashMap<>();
-        this.out = new HashMap<>();
 
         createDefUseSets();
         createInAndOutSets();
     }
 
+    /**
+     * Creates the def and use sets : a set of the defined registers and the used registers
+     * for each instruction.
+     */
     private void createDefUseSets() {
         for (NasmInst inst : nasm.listeInst) {
             createInstructionDefSet(inst);
@@ -52,6 +52,13 @@ public class FgSolution {
         use.put(inst, useSet);
     }
 
+    /**
+     * Adds the nasm operand value to the given set, for each general register in the
+     * instruction : either the passed operand is a register, or it's an address and
+     * in this case the method is called recursively with the base and offset.
+     * @param to The set to add the register value to.
+     * @param operand The operand to extract the values from.
+     */
     private void addNasmOperand(IntSet to, NasmOperand operand) {
         if (operand == null) return;
 
@@ -61,10 +68,11 @@ public class FgSolution {
             addNasmOperand(to, address.offset);
         }
 
-        if (operand.isGeneralRegister()) {
-            NasmRegister register = (NasmRegister) operand;
-            to.add(register.val);
-        }
+        if (!operand.isGeneralRegister())
+            return;
+
+        NasmRegister register = (NasmRegister) operand;
+        to.add(register.val);
     }
 
     /**

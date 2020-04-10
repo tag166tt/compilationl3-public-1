@@ -11,20 +11,18 @@ import util.intset.IntSetUtils;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Ig {
 
     private final static int REGISTERS_COUNT = 4;
 
-    public Graph graph;
-    public FgSolution fgs;
-    public int regNb;
-    public Nasm nasm;
-    public Node int2Node[];
+    private final Graph graph;
+    private final FgSolution fgs;
+    private final int regNb;
+    private final Nasm nasm;
+    private final Node[] int2Node;
 
 
     public Ig(FgSolution fgs) {
@@ -33,7 +31,7 @@ public class Ig {
         this.nasm = fgs.nasm;
         this.regNb = this.nasm.getTempCounter();
         this.int2Node = new Node[regNb];
-        this.construction();
+        this.build();
     }
 
     /**
@@ -50,7 +48,7 @@ public class Ig {
      * end for
      * </code>
      */
-    public void construction() {
+    public void build() {
         for (int i = 0; i < regNb; i++)
             int2Node[i] = graph.newNode();
 
@@ -60,6 +58,10 @@ public class Ig {
         }
     }
 
+    /**
+     * Creates non oriented edges for the given set from each value to another, without connecting
+     * the same value to itself.
+     */
     private void createNOEdges(IntSet set) {
         for (List<Integer> tuple: IntSetUtils.twoSetsCartesianProduct(set, set)) {
             if (tuple.get(0).equals(tuple.get(1))) continue;
@@ -69,19 +71,26 @@ public class Ig {
         }
     }
 
-    public int[] getPrecoloredTemporaries() {
-        int[] precoloredTemporaries = new int[nasm.getTempCounter()];//TODO
+    /**
+     * Collects the pre-colored temporaries into an array, where 0 indicates that the
+     * register is not pre-colored.
+     */
+    public int[] getPreColoredTemporaries() {
+        int[] preColoredTemporaries = new int[nasm.getTempCounter()];
 
-        List<NasmOperand> operands = nasm.listeInst.stream()
+        // Call the setOperandColor method for both the source and the destination operands
+        // of each instruction.
+        nasm.listeInst.stream()
                 .flatMap(instruction -> Stream.of(instruction.source, instruction.destination))
-                .collect(Collectors.toList());
+                .forEach(operand -> setOperandColor(preColoredTemporaries, operand));
 
-        for (NasmOperand operand: operands)
-            setOperandColor(precoloredTemporaries, operand);
-
-        return precoloredTemporaries;
+        return preColoredTemporaries;
     }
 
+    /**
+     * Sets the color for all of the registers contained in the given operand in the given
+     * array.
+     */
     private void setOperandColor(int[] colors, NasmOperand operand) {
         if (operand == null) return;
 
@@ -91,14 +100,18 @@ public class Ig {
             setOperandColor(colors, address.offset);
         }
 
-        if (operand.isGeneralRegister()) {
-            NasmRegister register = (NasmRegister) operand;
-            colors[register.val] = register.color;
-        }
+        if (!operand.isGeneralRegister())
+            return;
+
+        NasmRegister register = (NasmRegister) operand;
+        colors[register.val] = register.color;
     }
 
+    /**
+     * Allocates a real register to every temporary register in every instruction.
+     */
     public void allocateRegisters() {
-        ColorGraph colorGraph = new ColorGraph(graph, REGISTERS_COUNT, getPrecoloredTemporaries());
+        ColorGraph colorGraph = new ColorGraph(graph, REGISTERS_COUNT, getPreColoredTemporaries());
         int[] colors = colorGraph.color();
 
         for (NasmInst inst: nasm.listeInst) {
@@ -107,6 +120,9 @@ public class Ig {
         }
     }
 
+    /**
+     * Allocates the register of a given operand, using the given colors of the graph.
+     */
     private void allocateRegister(int[] colors, NasmOperand operand) {
         if (operand == null) return;
 
@@ -116,12 +132,13 @@ public class Ig {
             allocateRegister(colors, address.offset);
         }
 
-        if (operand.isGeneralRegister()) {
-            NasmRegister register = (NasmRegister) operand;
+        if (!operand.isGeneralRegister())
+            return;
 
-            if (register.color == Nasm.REG_UNK)
-                register.colorRegister(colors[register.val]);
-        }
+        NasmRegister register = (NasmRegister) operand;
+
+        if (register.color == Nasm.REG_UNK)
+            register.colorRegister(colors[register.val]);
     }
 
     public void affiche(String baseFileName) {

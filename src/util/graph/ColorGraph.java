@@ -10,8 +10,8 @@ public class ColorGraph {
 
     private final static int NOCOLOR = -1;
 
-    private final int tempRegistersNb;
-    private final int colorsNb;
+    private final int tempRegistersNb; // R
+    private final int colorsNb; // K
     private final IntSet removed;
     private final IntSet overflowed;
     private final int[] colors;
@@ -100,7 +100,7 @@ public class ColorGraph {
     public IntSet neighborsColors(int t) {
         Node node = int2Node[t];
 
-        return GraphUtils.streamFromNodeList(node.adj()) // TODO: from adj to succ
+        return GraphUtils.streamFromNodeList(node.adj())
                 .map(successor -> colors[successor.mykey])
                 .filter(color -> color != NOCOLOR)
                 .collect(IntSetUtils.toIntSet(colorsNb));
@@ -116,10 +116,8 @@ public class ColorGraph {
     public int neighborsCount(int t) {
         Node node = int2Node[t];
 
-        // TODO: distinct needed?
-
         // Count all adjacent nodes
-        return (int) GraphUtils.streamFromNodeList(node.adj()) // TODO: from adj to succ
+        return (int) GraphUtils.streamFromNodeList(node.adj())
                 .filter(successor -> !removed.isMember(successor.mykey))
                 .map(successor -> successor.mykey)
                 .distinct()
@@ -133,12 +131,9 @@ public class ColorGraph {
     }
 
     private int chooseVertex() {
-        for (int s = 0; s < int2Node.length; s++) {
+        for (int s = 0; s < int2Node.length; s++)
             // pas besoin de vérifier deborde : si x est dans déborde, alors il est dans enleves
-            if (!removed.isMember(s) && colors[s] == NOCOLOR) {
-                return s;
-            }
-        }
+            if (!removed.isMember(s) && colors[s] == NOCOLOR) return s;
 
         return -1;
     }

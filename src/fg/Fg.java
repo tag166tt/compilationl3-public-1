@@ -50,6 +50,10 @@ public class Fg implements NasmVisitor<Void> {
         }
     }
 
+    /**
+     * Creates a vertex in the graph for the given instruction.
+     * @param inst The instruction to add the vertex for.
+     */
     private void createInstructionVertex(NasmInst inst) {
         Node node = graph.newNode();
 
@@ -62,6 +66,10 @@ public class Fg implements NasmVisitor<Void> {
         }
     }
 
+    /**
+     * Adds an edge from the passed instruction to the next instruction (if there is one).
+     * @param inst The instruction to put at the start of the edge.
+     */
     private void addEdgeToNextInstruction(NasmInst inst) {
         int instructionIndex = nasm.listeInst.indexOf(inst);
         int nextInstructionIndex = instructionIndex + 1;
@@ -76,6 +84,10 @@ public class Fg implements NasmVisitor<Void> {
         graph.addEdge(instructionNode, nextInstructionNode);
     }
 
+    /**
+     * Adds an edge from the passed instruction to the label it points to.
+     * @param currentInstruction The instruction to put at the start of the edge.
+     */
     private void addEdgeToLabelAtAddress(NasmInst currentInstruction) {
         int currentInstructionIndex = nasm.listeInst.indexOf(currentInstruction);
 
